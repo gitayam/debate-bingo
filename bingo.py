@@ -35,6 +35,8 @@ bingo_phrases = [
     "Recession is mentioned", "Inflation is mentioned", "Russia is mentioned", "Project Veritas is mentioned",
     "Hunter Biden is mentioned", "Either candidate mentions the FBI", "Either candidate mentions the CIA",
     "Project 2025 is mentioned", "Either candidate mentions the 25th Amendment", "Either candidate mentions the 2nd Amendment",
+    "Windmills are killing birds", "Tarrifs are Good", "Tarrifs are Bad", "Either candidate mentions the 1st Amendment",
+    "School Shootings are mentioned", "Either candidate mentions the 14th Amendment", "Either candidate mentions the 13th Amendment",
 ]
 
 # Shuffle and select unique phrases based on the grid size
