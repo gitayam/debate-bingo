@@ -32,7 +32,9 @@ bingo_phrases = [
     "Either candidate mentions the Stock Market", "Either candidate mentions the Economy", "Either candidate mentions the Pandemic",
     "Either candidate mentions the Environment", "Either candidate mentions the Supreme Court", "Either candidate mentions the Military",
     "Trump mentions the Border Wall", "Harris mentions the Border Wall", "Either candidate mentions the Middle Class",
-    "Recession is mentioned", "Inflation is mentioned", "Russia is mentioned"
+    "Recession is mentioned", "Inflation is mentioned", "Russia is mentioned", "Project Veritas is mentioned",
+    "Hunter Biden is mentioned", "Either candidate mentions the FBI", "Either candidate mentions the CIA",
+    "Project 2025 is mentioned", "Either candidate mentions the 25th Amendment", "Either candidate mentions the 2nd Amendment",
 ]
 
 # Shuffle and select unique phrases based on the grid size
