@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.bingo import router as bingo_router
+from app.api.auth import router as auth_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -19,6 +20,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["authentication"])
 app.include_router(bingo_router, prefix=f"{settings.API_V1_STR}/bingo", tags=["bingo"])
 
 
