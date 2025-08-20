@@ -43,6 +43,7 @@ class Event(Base):
     # Relationships
     game_sessions = relationship("BingoGameSession", back_populates="event")
     scores = relationship("UserScore", back_populates="event")
+    game_rooms = relationship("GameRoom", back_populates="event")
     
     def __repr__(self) -> str:
         return f"<Event(id={self.id}, name='{self.name}', date='{self.event_date}')>"
