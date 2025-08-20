@@ -1,6 +1,6 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
@@ -54,13 +54,11 @@
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
-  
   body {
-    @apply bg-background text-foreground font-sans;
+    @apply font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    background: rgb(var(--background));
+    color: rgb(var(--foreground));
   }
 }
 
@@ -74,7 +72,7 @@
   }
   
   .card {
-    @apply bg-card text-card-foreground rounded-lg border shadow-sm;
+    @apply bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm;
   }
   
   .bingo-cell {

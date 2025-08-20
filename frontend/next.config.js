@@ -1,15 +1,15 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
-  experimental: {
-    typedRoutes: true,
-  },
+  typedRoutes: true,
   async rewrites() {
+    // In Docker, backend is accessible via service name
+    const backendUrl = process.env.BACKEND_URL || 'http://backend:8000';
+    
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8745/api/:path*',
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },

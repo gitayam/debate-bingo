@@ -60,9 +60,13 @@ def init_db() -> None:
             print("Initializing database with bingo phrases...")
             
             # Add all bingo phrases
-            for phrase_text in BINGO_PHRASES:
-                phrase = BingoPhrase(text=phrase_text, category="debate")
-                db.add(phrase)
+            unique_phrases = list(set(BINGO_PHRASES))  # Remove duplicates
+            for phrase_text in unique_phrases:
+                # Check if phrase already exists
+                existing = db.query(BingoPhrase).filter(BingoPhrase.text == phrase_text).first()
+                if not existing:
+                    phrase = BingoPhrase(text=phrase_text, category="debate")
+                    db.add(phrase)
             
             db.commit()
             print(f"Added {len(BINGO_PHRASES)} bingo phrases to the database.")
