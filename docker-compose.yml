@@ -45,7 +45,7 @@ services:
       REDIS_URL: redis://redis:6379/0
       ENVIRONMENT: development
     ports:
-      - "8000:8000"
+      - "8745:8000"
     volumes:
       - ./backend:/app
       - backend_venv:/app/.venv
@@ -63,9 +63,9 @@ services:
       dockerfile: Dockerfile.dev
     restart: unless-stopped
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_API_URL: http://localhost:8745
     ports:
-      - "3000:3000"
+      - "3745:3000"
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules

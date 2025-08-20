@@ -23,8 +23,8 @@ class Settings(BaseSettings):
     
     # CORS
     ALLOWED_ORIGINS: List[AnyHttpUrl] = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000"
+        "http://localhost:3745",
+        "http://127.0.0.1:3745"
     ]
     
     @validator("ALLOWED_ORIGINS", pre=True)

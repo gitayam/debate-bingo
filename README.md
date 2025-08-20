@@ -51,9 +51,9 @@ A modern, interactive debate bingo application built with **Next.js 15**, **Fast
    ```
 
 3. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000
-   - API Documentation: http://localhost:8000/docs
+   - Frontend: http://localhost:3745
+   - Backend API: http://localhost:8745
+   - API Documentation: http://localhost:8745/docs
 
 ### Option 2: Local Development
 
@@ -69,7 +69,7 @@ A modern, interactive debate bingo application built with **Next.js 15**, **Fast
    poetry install
    poetry run alembic upgrade head
    poetry run python app/utils/init_db.py
-   poetry run uvicorn app.main:app --reload
+   poetry run uvicorn app.main:app --reload --port 8745
    ```
 
 3. **Frontend setup:**
@@ -125,7 +125,7 @@ cd backend
 poetry install
 
 # Run development server
-poetry run uvicorn app.main:app --reload
+poetry run uvicorn app.main:app --reload --port 8745
 
 # Database migrations
 poetry run alembic revision --autogenerate -m "Description"
@@ -183,19 +183,19 @@ npm run type-check
 DATABASE_URL=postgresql://postgres:password@localhost:5432/debate_bingo_dev
 REDIS_URL=redis://localhost:6379/0
 SECRET_KEY=your-secret-key-here
-ALLOWED_ORIGINS=["http://localhost:3000"]
+ALLOWED_ORIGINS=["http://localhost:3745"]
 ```
 
 **Frontend** (`.env.local`):
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8745
 ```
 
 ## 📊 API Documentation
 
 The FastAPI backend automatically generates interactive API documentation:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
+- **Swagger UI**: http://localhost:8745/docs
+- **ReDoc**: http://localhost:8745/redoc
 
 ### Key Endpoints
 - `GET /api/v1/bingo/phrases` - Get all bingo phrases
