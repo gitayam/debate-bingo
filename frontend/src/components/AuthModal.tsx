@@ -228,6 +228,41 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
               {isLoading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
             </button>
             
+            {/* Demo Accounts (Development Only) */}
+            {mode === 'login' && (
+              <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                <p className="text-xs font-medium text-blue-800 dark:text-blue-200 mb-2">Demo Accounts:</p>
+                <div className="space-y-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        email: 'user1@demo.com',
+                        password: 'Demo123!'
+                      });
+                    }}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline block"
+                  >
+                    User 1: user1@demo.com / Demo123!
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        email: 'user2@demo.com',
+                        password: 'Demo123!'
+                      });
+                    }}
+                    className="text-xs text-blue-600 dark:text-blue-400 hover:underline block"
+                  >
+                    User 2: user2@demo.com / Demo123!
+                  </button>
+                </div>
+              </div>
+            )}
+            
             {/* Switch Mode */}
             <div className="text-center">
               <p className="text-sm text-gray-600 dark:text-gray-400">
