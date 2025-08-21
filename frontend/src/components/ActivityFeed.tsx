@@ -1,7 +1,9 @@
 'use client';
 
-import React from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import React, { useMemo, useState } from 'react';
+import { useWebSocket } from '@/contexts/SimpleWebSocketContext';
+import { useBingoGame } from '@/hooks/useBingoGame';
+import { EventDetailsModal } from './EventDetailsModal';
 import { 
   CheckSquare, 
   Trophy, 
@@ -10,15 +12,49 @@ import {
   UserMinus,
   MessageSquare,
   Zap,
-  Clock
+  Clock,
+  Tv,
+  ExternalLink
 } from 'lucide-react';
 
-export const ActivityFeed: React.FC = () => {
+interface ActivityFeedProps {
+  includeTimeline?: boolean;
+}
+
+export const ActivityFeed: React.FC<ActivityFeedProps> = ({ includeTimeline = false }) => {
   const { activityFeed, roomCode } = useWebSocket();
+  const { timeline } = useBingoGame();
+  const [selectedEvent, setSelectedEvent] = useState<any | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   if (!roomCode) {
     return null;
   }
+
+  // Merge timeline events with activity feed if includeTimeline is true
+  const mergedFeed = useMemo(() => {
+    if (!includeTimeline) {
+      return activityFeed;
+    }
+
+    // Convert timeline events to activity format
+    const timelineActivities = timeline.map((event, index) => ({
+      id: `timeline-${index}`,
+      type: 'timeline_event',
+      message: event.phrase,
+      timestamp: event.timestamp,
+      priority: 'low' as const,
+      color: 'gray' as const,
+      icon: 'tv',
+      data: {}
+    }));
+
+    // Merge and sort by timestamp
+    const combined = [...activityFeed, ...timelineActivities];
+    return combined.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    ).slice(0, 50); // Keep only the latest 50 items
+  }, [activityFeed, timeline, includeTimeline]);
 
   const getActivityIcon = (type: string, icon?: string) => {
     switch (icon || type) {
@@ -39,6 +75,9 @@ export const ActivityFeed: React.FC = () => {
         return <UserMinus className="w-4 h-4" />;
       case 'message':
         return <MessageSquare className="w-4 h-4" />;
+      case 'tv':
+      case 'timeline_event':
+        return <Tv className="w-4 h-4" />;
       default:
         return <Zap className="w-4 h-4" />;
     }
@@ -84,6 +123,28 @@ export const ActivityFeed: React.FC = () => {
     }
   };
 
+  const handleEventClick = (activity: any) => {
+    // Only handle clicks for timeline events and square marked events
+    if (activity.type === 'timeline_event' || activity.type === 'square_marked') {
+      const eventDetails = {
+        id: activity.id,
+        type: activity.type,
+        phrase: activity.data?.phrase || activity.message,
+        message: activity.message,
+        timestamp: activity.timestamp,
+        userId: activity.data?.userId,
+        username: activity.data?.username,
+        playersMarked: activity.data?.playersMarked || 0,
+        disputes: [],
+        supports: [],
+        votes: { up: 0, down: 0, userVote: null },
+        isSubstantiated: false
+      };
+      setSelectedEvent(eventDetails);
+      setIsModalOpen(true);
+    }
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md h-full flex flex-col">
       <div className="px-4 py-3 border-b border-gray-200">
@@ -92,20 +153,24 @@ export const ActivityFeed: React.FC = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-2">
-        {activityFeed.length === 0 ? (
+        {mergedFeed.length === 0 ? (
           <div className="text-center py-8">
             <Zap className="w-8 h-8 text-gray-300 mx-auto mb-2" />
             <p className="text-sm text-gray-500">No activity yet</p>
             <p className="text-xs text-gray-400 mt-1">Activities will appear here in real-time</p>
           </div>
         ) : (
-          activityFeed.map((activity) => {
+          mergedFeed.map((activity) => {
             const colorClass = getActivityColor(activity.priority, activity.color);
+            const isClickable = activity.type === 'timeline_event' || activity.type === 'square_marked';
             
             return (
               <div
                 key={activity.id}
-                className={`flex items-start gap-3 p-3 rounded-lg border transition-all hover:shadow-sm ${colorClass}`}
+                className={`flex items-start gap-3 p-3 rounded-lg border transition-all hover:shadow-sm ${colorClass} ${
+                  isClickable ? 'cursor-pointer hover:ring-2 hover:ring-blue-300' : ''
+                }`}
+                onClick={() => handleEventClick(activity)}
               >
                 <div className="flex-shrink-0 mt-0.5">
                   {getActivityIcon(activity.type, activity.icon)}
@@ -145,18 +210,35 @@ export const ActivityFeed: React.FC = () => {
                     </span>
                   </div>
                 )}
+                {isClickable && (
+                  <div className="flex-shrink-0">
+                    <ExternalLink className="w-4 h-4 text-blue-500" />
+                  </div>
+                )}
               </div>
             );
           })
         )}
       </div>
 
-      {activityFeed.length > 0 && (
+      {mergedFeed.length > 0 && (
         <div className="px-4 py-2 border-t border-gray-200 bg-gray-50">
           <p className="text-xs text-gray-500 text-center">
-            Showing last {activityFeed.length} activities
+            Showing last {mergedFeed.length} activities
           </p>
         </div>
+      )}
+
+      {/* Event Details Modal */}
+      {selectedEvent && (
+        <EventDetailsModal
+          event={selectedEvent}
+          isOpen={isModalOpen}
+          onClose={() => {
+            setIsModalOpen(false);
+            setSelectedEvent(null);
+          }}
+        />
       )}
     </div>
   );

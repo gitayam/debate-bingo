@@ -8,23 +8,35 @@ import { ActivityFeed } from '@/components/ActivityFeed';
 import { Scoreboard } from '@/components/Scoreboard';
 import { BingoGrid } from '@/components/BingoGrid';
 import { GameStatus } from '@/components/GameStatus';
+import { TestAuth } from '@/components/TestAuth';
+import { LiveComments } from '@/components/LiveComments';
 import { useBingoGame } from '@/hooks/useBingoGame';
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useWebSocket } from '@/contexts/SimpleWebSocketContext';
 import { Wifi, WifiOff } from 'lucide-react';
 
 export default function MultiplayerPage() {
   const router = useRouter();
   const { isAuthenticated } = useAuthStore();
   const { currentGame, gridSize } = useBingoGame();
-  const { isConnected, roomCode } = useWebSocket();
+  const { isConnected, roomCode, debugInfo, joinRoom } = useWebSocket();
   const [layout, setLayout] = useState<'desktop' | 'mobile'>('desktop');
+  const [showDebug, setShowDebug] = useState(true); // Show debug in dev
+  const [activeTab, setActiveTab] = useState<'game' | 'activity' | 'scoreboard'>('game');
 
-  // Check authentication
+  // Check authentication and pending room join
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/');
+      return;
     }
-  }, [isAuthenticated, router]);
+
+    // Check if there's a pending room to join (from URL join)
+    const pendingRoomCode = sessionStorage.getItem('pendingRoomCode');
+    if (pendingRoomCode && isConnected && !roomCode) {
+      sessionStorage.removeItem('pendingRoomCode');
+      joinRoom(pendingRoomCode.toUpperCase()).catch(console.error);
+    }
+  }, [isAuthenticated, isConnected, roomCode, router]);
 
   // Detect screen size for responsive layout
   useEffect(() => {
@@ -47,6 +59,30 @@ export default function MultiplayerPage() {
 
   return (
     <div className="max-w-full">
+      {/* Test Authentication */}
+      <TestAuth />
+
+      {/* Debug Panel (Development Only) */}
+      {showDebug && (
+        <div className="mb-4 p-4 bg-gray-100 border border-gray-300 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-sm">WebSocket Debug Info</h3>
+            <button 
+              onClick={() => setShowDebug(false)}
+              className="text-xs text-gray-500 hover:text-gray-700"
+            >
+              Hide
+            </button>
+          </div>
+          <div className="text-xs font-mono space-y-1">
+            <div>Status: {isConnected ? '🟢 Connected' : '🔴 Disconnected'}</div>
+            <div>Room: {roomCode || 'None'}</div>
+            <div>Debug: {debugInfo || 'No debug info'}</div>
+            <div>Token: {useAuthStore.getState().accessToken ? '✓ Available' : '✗ Missing'}</div>
+          </div>
+        </div>
+      )}
+
       {/* Connection Status Bar */}
       <div className={`mb-4 px-4 py-2 rounded-lg flex items-center justify-between ${
         isConnected 
@@ -86,28 +122,32 @@ export default function MultiplayerPage() {
           {/* Desktop Layout */}
           {layout === 'desktop' && (
             <div className="grid grid-cols-12 gap-4">
-              {/* Left Panel - Activity Feed */}
-              <div className="col-span-3 h-[calc(100vh-12rem)]">
-                <ActivityFeed />
+              {/* Left Panel - Unified Activity Feed */}
+              <div className="col-span-3">
+                <ActivityFeed includeTimeline />
               </div>
 
               {/* Center Panel - Game */}
               <div className="col-span-6 space-y-4">
-                {/* Room Info */}
+                {/* Room Info with Share Button */}
                 <RoomManager />
                 
-                {/* Game Status */}
-                <GameStatus />
+                {/* Game Info (without timeline) */}
+                <GameStatus hideTimeline />
                 
-                {/* Bingo Grid */}
+                {/* Bingo Grid - Primary Focus */}
                 <div className="flex justify-center">
                   <BingoGrid gridSize={gridSize} />
                 </div>
               </div>
 
-              {/* Right Panel - Scoreboard */}
-              <div className="col-span-3 h-[calc(100vh-12rem)]">
-                <Scoreboard />
+              {/* Right Panel - Scores & Comments */}
+              <div className="col-span-3 space-y-4">
+                {/* Compact Scoreboard */}
+                <Scoreboard compact />
+                
+                {/* Live Comments */}
+                <LiveComments />
               </div>
             </div>
           )}
@@ -122,20 +162,32 @@ export default function MultiplayerPage() {
               <div className="bg-white rounded-lg shadow-md">
                 <div className="flex border-b border-gray-200">
                   <button
-                    className="flex-1 px-4 py-3 text-sm font-medium text-blue-600 border-b-2 border-blue-600"
-                    onClick={() => {/* Switch to game tab */}}
+                    className={`flex-1 px-4 py-3 text-sm font-medium ${
+                      activeTab === 'game' 
+                        ? 'text-blue-600 border-b-2 border-blue-600' 
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveTab('game')}
                   >
                     Game
                   </button>
                   <button
-                    className="flex-1 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-800"
-                    onClick={() => {/* Switch to activity tab */}}
+                    className={`flex-1 px-4 py-3 text-sm font-medium ${
+                      activeTab === 'activity' 
+                        ? 'text-blue-600 border-b-2 border-blue-600' 
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveTab('activity')}
                   >
                     Activity
                   </button>
                   <button
-                    className="flex-1 px-4 py-3 text-sm font-medium text-gray-600 hover:text-gray-800"
-                    onClick={() => {/* Switch to scoreboard tab */}}
+                    className={`flex-1 px-4 py-3 text-sm font-medium ${
+                      activeTab === 'scoreboard' 
+                        ? 'text-blue-600 border-b-2 border-blue-600' 
+                        : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveTab('scoreboard')}
                   >
                     Scoreboard
                   </button>
@@ -143,19 +195,21 @@ export default function MultiplayerPage() {
 
                 {/* Tab Content */}
                 <div className="p-4">
-                  {/* Game Tab (default) */}
-                  <div className="space-y-4">
-                    <GameStatus />
-                    <div className="flex justify-center">
-                      <BingoGrid gridSize={gridSize} />
+                  {/* Game Tab */}
+                  {activeTab === 'game' && (
+                    <div className="space-y-4">
+                      <GameStatus />
+                      <div className="flex justify-center">
+                        <BingoGrid gridSize={gridSize} />
+                      </div>
                     </div>
-                  </div>
+                  )}
                   
-                  {/* Activity Tab (hidden by default) */}
-                  {/* <ActivityFeed /> */}
+                  {/* Activity Tab */}
+                  {activeTab === 'activity' && <ActivityFeed />}
                   
-                  {/* Scoreboard Tab (hidden by default) */}
-                  {/* <Scoreboard /> */}
+                  {/* Scoreboard Tab */}
+                  {activeTab === 'scoreboard' && <Scoreboard />}
                 </div>
               </div>
             </div>

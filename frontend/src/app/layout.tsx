@@ -21,7 +21,11 @@ export const metadata: Metadata = {
   description: 'Interactive debate bingo game for political events',
   keywords: ['debate', 'bingo', 'politics', 'game', 'interactive'],
   authors: [{ name: 'Debate Bingo Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({

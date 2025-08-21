@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.bingo import router as bingo_router
 from app.api.auth import router as auth_router
 from app.api.websocket import router as websocket_router
+# from app.api.socketio_server import socket_app  # Temporarily disabled
 from app.core.config import settings
 
 app = FastAPI(
@@ -36,3 +37,6 @@ def read_root():
 def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+# Mount Socket.IO app - temporarily disabled
+# app.mount("/", socket_app)

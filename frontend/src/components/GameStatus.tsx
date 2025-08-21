@@ -5,7 +5,15 @@ import { useBingoGame } from '@/hooks/useBingoGame';
 import { Trophy, Clock, User } from 'lucide-react';
 import { clsx } from 'clsx';
 
-export const GameStatus: React.FC = () => {
+interface GameStatusProps {
+  showTimelineOnly?: boolean;
+  hideTimeline?: boolean;
+}
+
+export const GameStatus: React.FC<GameStatusProps> = ({ 
+  showTimelineOnly = false, 
+  hideTimeline = false 
+}) => {
   const { currentGame, isGameCompleted, winningCombination, timeline } = useBingoGame();
 
   if (!currentGame) return null;
@@ -25,6 +33,40 @@ export const GameStatus: React.FC = () => {
     
     return `${minutes}m ${seconds}s`;
   };
+
+  // If showing timeline only, just render the timeline
+  if (showTimelineOnly) {
+    if (timeline.length === 0) {
+      return (
+        <div className="text-center py-4 text-gray-500">
+          No events yet
+        </div>
+      );
+    }
+    
+    return (
+      <div className="space-y-2">
+        {timeline.map((entry, index) => (
+          <div
+            key={index}
+            className={clsx(
+              'flex items-start space-x-3 p-2 rounded-lg text-sm transition-all duration-200',
+              index === timeline.length - 1
+                ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800'
+                : 'bg-gray-50 dark:bg-gray-800'
+            )}
+          >
+            <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap mt-0.5">
+              {formatTime(entry.timestamp)}
+            </span>
+            <span className="text-gray-700 dark:text-gray-300 flex-1">
+              {entry.phrase}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto space-y-4">
@@ -90,8 +132,8 @@ export const GameStatus: React.FC = () => {
         </div>
       )}
 
-      {/* Timeline */}
-      {timeline.length > 0 && (
+      {/* Timeline - Conditionally rendered based on hideTimeline prop */}
+      {!hideTimeline && timeline.length > 0 && (
         <div className="card p-4">
           <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
             Timeline

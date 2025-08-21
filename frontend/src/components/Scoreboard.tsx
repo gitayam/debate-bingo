@@ -1,11 +1,15 @@
 'use client';
 
 import React from 'react';
-import { useWebSocket } from '@/contexts/WebSocketContext';
+import { useWebSocket } from '@/contexts/SimpleWebSocketContext';
 import { Trophy, Medal, Award, Target, User, TrendingUp } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 
-export const Scoreboard: React.FC = () => {
+interface ScoreboardProps {
+  compact?: boolean;
+}
+
+export const Scoreboard: React.FC<ScoreboardProps> = ({ compact = false }) => {
   const { scoreboard, roomCode } = useWebSocket();
   const { user } = useAuthStore();
 
@@ -43,6 +47,65 @@ export const Scoreboard: React.FC = () => {
     return Math.min(100, (marked / total) * 100);
   };
 
+  // Limit to top 10 for compact mode
+  const displayScoreboard = compact ? scoreboard.slice(0, 10) : scoreboard;
+
+  // Compact view for right sidebar
+  if (compact) {
+    return (
+      <div className="bg-white rounded-lg shadow-md">
+        <div className="px-4 py-3 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-gray-900">Live Scores</h3>
+            <Trophy className="w-4 h-4 text-yellow-500" />
+          </div>
+        </div>
+        
+        <div className="max-h-96 overflow-y-auto">
+          {displayScoreboard.length === 0 ? (
+            <div className="text-center py-4">
+              <p className="text-xs text-gray-500">No scores yet</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-gray-100">
+              {displayScoreboard.map((entry) => {
+                const isCurrentUser = user?.id === entry.userId;
+                return (
+                  <div
+                    key={entry.userId}
+                    className={`px-3 py-2 text-xs ${
+                      isCurrentUser ? 'bg-blue-50' : ''
+                    } ${entry.position === 1 ? 'bg-yellow-50' : ''}`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-gray-500 w-4">
+                          {entry.position}
+                        </span>
+                        <span className={`font-medium truncate max-w-[120px] ${
+                          isCurrentUser ? 'text-blue-600' : 'text-gray-900'
+                        }`}>
+                          {entry.displayName || entry.username}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-gray-500">{entry.squaresMarked}</span>
+                        <span className="font-bold text-gray-900 w-10 text-right">
+                          {entry.score}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  // Full view (original)
   return (
     <div className="bg-white rounded-lg shadow-md h-full flex flex-col">
       <div className="px-4 py-3 border-b border-gray-200">

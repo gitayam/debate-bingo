@@ -20,9 +20,25 @@ router = APIRouter()
 async def get_current_user_ws(token: str) -> Optional[dict]:
     """Authenticate WebSocket connection."""
     try:
-        payload = AuthService.verify_token(token)
-        return {"id": int(payload.get("sub"))}
-    except:
+        from jose import jwt
+        print(f"[WebSocket Auth] Attempting to verify token: {token[:50]}...")
+        
+        # Manually decode JWT for WebSocket (avoid HTTPException)
+        SECRET_KEY = "your-secret-key-here"
+        ALGORITHM = "HS256"
+        
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        
+        # Check token type
+        if payload.get("type") != "access":
+            print(f"[WebSocket Auth] Invalid token type: {payload.get('type')}")
+            return None
+            
+        user_id = int(payload.get("sub"))
+        print(f"[WebSocket Auth] Token valid for user_id: {user_id}")
+        return {"id": user_id}
+    except Exception as e:
+        print(f"[WebSocket Auth] Token verification failed: {e}")
         return None
 
 
@@ -33,6 +49,8 @@ async def websocket_endpoint(
     token: str = Query(...)
 ):
     """WebSocket endpoint for real-time game interactions."""
+    print(f"[WebSocket] Connection attempt to room: {room_code}")
+    print(f"[WebSocket] Token provided: {token[:50] if token else 'None'}...")
     
     # Authenticate user
     user = await get_current_user_ws(token)

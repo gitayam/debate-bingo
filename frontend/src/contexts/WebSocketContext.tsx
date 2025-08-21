@@ -89,10 +89,17 @@ export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       // Only create a new socket if we don't have one
       if (socketRef.current) return;
 
-      const socket = io(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8745', {
-        path: '/ws',
-        transports: ['websocket'],
+      // For now, we'll use Socket.io client but point to the WebSocket endpoint
+      // The backend uses raw WebSockets, so we need to adjust the connection
+      const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8745';
+      
+      const socket = io(wsUrl, {
+        path: '/socket.io/',  // Socket.io default path
+        transports: ['websocket', 'polling'],
         auth: {
+          token
+        },
+        query: {
           token
         },
         reconnection: true,
