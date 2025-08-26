@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.bingo import router as bingo_router
+from app.api.auth import router as auth_router
+from app.api.websocket import router as websocket_router
+# from app.api.socketio_server import socket_app  # Temporarily disabled
 from app.core.config import settings
 
 app = FastAPI(
@@ -19,7 +22,9 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router, prefix=f"{settings.API_V1_STR}/auth", tags=["authentication"])
 app.include_router(bingo_router, prefix=f"{settings.API_V1_STR}/bingo", tags=["bingo"])
+app.include_router(websocket_router, tags=["websocket"])
 
 
 @app.get("/")
@@ -32,3 +37,6 @@ def read_root():
 def health_check():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+# Mount Socket.IO app - temporarily disabled
+# app.mount("/", socket_app)

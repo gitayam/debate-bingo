@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, JSON, Text
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, JSON, Text, Float
 from sqlalchemy.orm import relationship
 
 from .base import Base
@@ -30,8 +30,16 @@ class BingoGameSession(Base):
     is_completed = Column(Boolean, default=False, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     
-    # Relationship to bingo cards
+    # User relationship (optional for backward compatibility)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    
+    # Event relationship (optional)
+    event_id = Column(Integer, ForeignKey("events.id"), nullable=True)
+    
+    # Relationships
     cards = relationship("BingoCard", back_populates="game_session", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="game_sessions")
+    event = relationship("Event", back_populates="game_sessions")
     
     def __repr__(self) -> str:
         return f"<BingoGameSession(id={self.id}, session_id='{self.session_id}')>"

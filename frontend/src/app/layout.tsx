@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import { Providers } from './providers';
+import { Header } from '@/components/Header';
 import './globals.css';
 
 const inter = Inter({ 
@@ -20,7 +21,11 @@ export const metadata: Metadata = {
   description: 'Interactive debate bingo game for political events',
   keywords: ['debate', 'bingo', 'politics', 'game', 'interactive'],
   authors: [{ name: 'Debate Bingo Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
@@ -33,16 +38,8 @@ export default function RootLayout({
       <body className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
         <Providers>
           <div className="min-h-screen flex flex-col">
-            {/* Header */}
-            <header className="bg-white dark:bg-gray-900 shadow-sm border-b border-gray-200 dark:border-gray-800">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div className="flex items-center justify-center">
-                  <h1 className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-orange-600 bg-clip-text text-transparent font-display">
-                    Debate Bingo
-                  </h1>
-                </div>
-              </div>
-            </header>
+            {/* Header with Auth */}
+            <Header />
 
             {/* Main Content */}
             <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8">

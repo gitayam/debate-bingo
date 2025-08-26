@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # Database
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5432/debate_bingo_dev"
+    DATABASE_URL: str = "postgresql://postgres:password@localhost:5445/debate_bingo_dev"
     TEST_DATABASE_URL: Optional[str] = None
     
     # Redis
