@@ -161,7 +161,8 @@ class PrivacyAuthService:
                 "id": user.id,
                 "account_hash": user.account_hash,
                 "username": user.username,
-                "is_anonymous": user.is_anonymous
+                "is_anonymous": user.is_anonymous,
+                "created_at": user.created_at.isoformat() if user.created_at else datetime.utcnow().isoformat()
             }
         }
     

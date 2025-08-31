@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic import AnyHttpUrl, validator, Field
 from pydantic_settings import BaseSettings
 import secrets
@@ -10,8 +10,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Debate Bingo API"
     API_V1_STR: str = "/api/v1"
     
-    # Database
-    DATABASE_URL: str = "postgresql://postgres:password@localhost:5445/debate_bingo_dev"
+    # Database - SQLite for local development, PostgreSQL for production
+    DATABASE_URL: str = "sqlite:///./debate_bingo_dev.db"
     TEST_DATABASE_URL: Optional[str] = None
     
     # Redis
@@ -40,8 +40,14 @@ class Settings(BaseSettings):
     ENABLE_SECURITY_HEADERS: bool = True
     ENABLE_HTTPS_REDIRECT: bool = False  # Enable in production
     
+    # Rate Limiting
+    RATE_LIMIT_PER_MINUTE: int = 60
+    
+    # Deprecated fields for backward compatibility
+    ALGORITHM: Optional[str] = None  # Use JWT_ALGORITHM instead
+    
     @validator("ALLOWED_ORIGINS", pre=True)
-    def assemble_cors_origins(cls, v: str | List[str]) -> List[str] | str:
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str) and not v.startswith("["):
             return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):

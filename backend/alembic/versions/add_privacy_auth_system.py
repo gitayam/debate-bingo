@@ -16,7 +16,7 @@ from sqlalchemy import Column, String, Boolean, DateTime, Integer
 
 # revision identifiers, used by Alembic.
 revision: str = 'privacy_auth_001'
-down_revision: Union[str, None] = None  # Update this to the actual previous revision
+down_revision: Union[str, None] = '927f65a12c67'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
