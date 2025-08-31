@@ -1,9 +1,11 @@
-from typing import List
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.services.bingo_service import BingoService
+from app.api.privacy_auth import get_current_user, get_optional_user  # Privacy-focused auth
+from app.middleware.security import api_rate_limit
 from app.schemas.bingo import (
     BingoPhraseResponse,
     BingoGameSessionCreate,
@@ -16,17 +18,34 @@ router = APIRouter()
 
 
 @router.get("/phrases", response_model=List[BingoPhraseResponse])
-def get_bingo_phrases(db: Session = Depends(get_db)):
-    """Get all active bingo phrases."""
+@api_rate_limit()
+def get_bingo_phrases(
+    request: Request,
+    db: Session = Depends(get_db),
+    current_user: Optional[dict] = Depends(get_optional_user)
+):
+    """Get all active bingo phrases. Authentication optional for analytics."""
     service = BingoService(db)
     phrases = service.get_all_phrases()
+    
+    # Log usage for analytics (user_id if authenticated)
+    import logging
+    logger = logging.getLogger("analytics")
+    logger.info(
+        "Phrases requested", 
+        extra={"user_id": current_user.get("id") if current_user else None}
+    )
+    
     return [BingoPhraseResponse.from_orm(phrase) for phrase in phrases]
 
 
 @router.post("/game", response_model=BingoGameSessionResponse, status_code=status.HTTP_201_CREATED)
+@api_rate_limit()
 def create_game_session(
+    request: Request,
     session_data: BingoGameSessionCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(get_current_user)  # Require authentication
 ):
     """Create a new bingo game session."""
     service = BingoService(db)

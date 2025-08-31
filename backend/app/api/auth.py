@@ -2,6 +2,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
+import logging
 
 from app.core.database import get_db
 from app.schemas.auth import (
@@ -10,6 +11,7 @@ from app.schemas.auth import (
 )
 from app.services.auth_service import AuthService
 from app.models.user import User
+from app.middleware.security import auth_rate_limit
 
 router = APIRouter()
 security = HTTPBearer()
@@ -82,15 +84,35 @@ def register(
 
 
 @router.post("/login", response_model=AuthResponse)
+@auth_rate_limit()  # 5 attempts per minute
 def login(
     credentials: UserLogin,
     request: Request,
     db: Session = Depends(get_db)
 ):
     """Login with email and password."""
+    security_logger = logging.getLogger("security")
+    
+    # Log login attempt
+    security_logger.info(
+        "Login attempt",
+        extra={
+            "email": credentials.email,
+            "client_ip": request.client.host if request.client else "unknown"
+        }
+    )
+    
     # Authenticate user
     user = AuthService.authenticate_user(db, credentials.email, credentials.password)
     if not user:
+        # Log failed authentication
+        security_logger.warning(
+            "Login failed - invalid credentials",
+            extra={
+                "email": credentials.email,
+                "client_ip": request.client.host if request.client else "unknown"
+            }
+        )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect email or password",

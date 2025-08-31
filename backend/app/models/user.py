@@ -8,16 +8,25 @@ from .base import Base
 
 
 class User(Base):
-    """User model for authentication and profiles."""
+    """Privacy-focused user model with hash-based authentication."""
     
     __tablename__ = "users"
     
-    email = Column(String(255), unique=True, nullable=False, index=True)
-    username = Column(String(100), unique=True, nullable=False, index=True)
-    password_hash = Column(String(255), nullable=True)  # Nullable for OAuth users
+    # Privacy-first: Hash-based account system (like Mullvad)
+    account_hash = Column(String(16), unique=True, nullable=False, index=True)
+    username = Column(String(100), nullable=False, index=True)  # Display name only
+    
+    # Email/password REMOVED for privacy
+    email = Column(String(255), nullable=True, index=True)  # Optional, for notifications only
+    password_hash = Column(String(255), nullable=True)  # DEPRECATED - will be removed
+    
+    # Account status
     is_active = Column(Boolean, default=True, nullable=False)
-    is_verified = Column(Boolean, default=False, nullable=False)
+    is_anonymous = Column(Boolean, default=True, nullable=False)  # All accounts anonymous by default
     is_admin = Column(Boolean, default=False, nullable=False)
+    
+    # Privacy settings
+    deactivated_at = Column(DateTime, nullable=True)  # For privacy compliance
     
     # Profile fields
     display_name = Column(String(100), nullable=True)

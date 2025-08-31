@@ -80,53 +80,109 @@ Transform Debate Bingo from a single-player game into a vibrant community platfo
 - [ ] **User following/friends** (social graph)
 - [ ] **Content moderation** (reporting, blocking)
 
-## Phase 3: Production Readiness (2-3 days)
-**Timeline: After core features stable**
+## Phase 3: Security Hardening (2-3 days) 🛡️
+**Timeline: PRIORITY - Before any production deployment**
+**Branch: `security/hardening`**
 
-### 3.1 Performance & Scalability
+### 3.1 Critical Security Fixes (Day 1)
+- [ ] **Fix CVE-2024-33663** - Update python-jose to >=3.3.1
+- [ ] **Replace hardcoded secrets** - Move all JWT keys to environment
+- [ ] **Centralize WebSocket auth** - Use consistent token validation
+- [ ] **Add authentication gates** - Secure all sensitive endpoints
+- [ ] **Security testing** - Verify fixes work correctly
+
+### 3.2 Authentication & Authorization (Day 2)  
+- [ ] **Implement RBAC** - Role-based access control system
+- [ ] **Add endpoint protection** - Authentication middleware
+- [ ] **Session management** - Proper token lifecycle
+- [ ] **User permission system** - Granular access controls
+- [ ] **Admin controls** - User management and moderation
+
+### 3.3 Input Security & Rate Limiting (Day 3)
+- [ ] **SQL injection prevention** - Parameterized queries
+- [ ] **Input validation** - Comprehensive sanitization 
+- [ ] **Rate limiting** - Prevent brute force attacks
+- [ ] **Security headers** - Browser security protections
+- [ ] **CORS hardening** - Restrict to specific origins
+
+### 3.4 Security Monitoring
+- [ ] **Security event logging** - Track suspicious activity
+- [ ] **Vulnerability scanning** - Automated security checks
+- [ ] **Security metrics** - Dashboard for security health
+- [ ] **Incident response** - Automated threat detection
+
+## Phase 4: Production Readiness (2-3 days)
+**Timeline: After security hardening complete**
+
+### 4.1 Performance & Scalability  
 - [x] Caching strategies designed ✅
 - [x] Database optimization patterns ✅
 - [x] WebSocket scaling architecture ✅
 - [ ] **Load testing** (100+ concurrent users)
 - [ ] **Performance monitoring** (error tracking)
-- [ ] **Security audit** (vulnerability assessment)
 - [ ] **Production deployment** (Docker, CI/CD)
 
-## ⚡ **CRITICAL FIRST STEPS (Next 2 Hours)**
+## 🚨 **SECURITY ALERT - IMMEDIATE ACTION REQUIRED**
 
-### Immediate Actions Required:
-1. **Database Setup**
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # or `venv\Scripts\activate` on Windows
-   pip install -r requirements.txt
-   alembic upgrade head
-   python app/utils/seed_users.py
-   ```
+**CRITICAL SECURITY AUDIT FINDINGS**: Our comprehensive security review identified **3 CRITICAL** and **5 HIGH** severity vulnerabilities that must be addressed before any production deployment.
 
-2. **Environment Configuration**
-   ```bash
-   cp backend/.env.example backend/.env
-   # Edit .env with proper database URL and JWT secret
-   ```
+### **Critical Vulnerabilities Discovered:**
+1. **Hardcoded JWT Secret Keys** - Complete authentication bypass possible
+2. **CVE-2024-33663** - python-jose vulnerable to JWT signature bypass  
+3. **Missing Authentication** - Bingo endpoints allow unauthorized access
+4. **SQL Injection Risks** - Database compromise possible
+5. **Token Exposure** - JWT tokens logged in plaintext
 
-3. **Frontend Setup**
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+**See `SECURITY_HARDENING_PLAN.md` for complete details and fixes.**
 
-4. **Test Authentication**
-   - Start backend: `uvicorn app.main:app --reload --host 0.0.0.0 --port 8745`
-   - Test demo user login
-   - Verify JWT token generation
+## ⚡ **REVISED CRITICAL FIRST STEPS (Security First Approach)**
 
-### Expected Timeline Revision:
-- ~~Original: 12+ weeks for full platform~~ 
-- **Revised: 5-7 days for fully functional multiplayer platform**
-- **Reason: 90% of work already completed across branches**
+### **STEP 0: Security Hardening (MANDATORY - Day 0)**
+**Status**: 🚨 **PRODUCTION BLOCKING** - Must complete before any other work
+- [ ] **Update python-jose** to >=3.3.1 (CVE-2024-33663 fix)
+- [ ] **Replace hardcoded JWT secrets** with environment variables
+- [ ] **Add authentication** to bingo endpoints
+- [ ] **Implement input validation** and SQL injection prevention
+- [ ] **Configure security headers** and proper CORS
+- [ ] **Add rate limiting** on authentication endpoints
+
+### **STEP 1: Secure Environment Setup** 
+```bash
+cd backend
+
+# Update vulnerable dependencies FIRST
+pip install python-jose[cryptography]>=3.3.1 PyJWT>=2.8.0
+
+# Create secure .env file
+cp .env.example .env
+# CRITICAL: Generate secure JWT secret (minimum 32 characters)
+echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
+
+# Complete environment setup
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+alembic upgrade head
+python app/utils/seed_users.py
+```
+
+### **STEP 2: Frontend Setup**
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### **STEP 3: Security Testing**
+- [ ] Start backend: `uvicorn app.main:app --reload --host 0.0.0.0 --port 8745`
+- [ ] Test authentication with secure tokens
+- [ ] Verify rate limiting works
+- [ ] Test endpoint authorization
+
+### **Expected Timeline Revision:**
+- ~~Original: 5-7 days for fully functional platform~~
+- **Security-First Revised: 7-10 days (2-3 days security hardening + 5-7 days integration)**
+- **Reason: Security vulnerabilities must be fixed before any feature deployment**
 
 ## Phase 2: Community Scoreboards (v1.2.0)
 **Timeline: 1 week**

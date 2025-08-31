@@ -18,27 +18,36 @@ router = APIRouter()
 
 
 async def get_current_user_ws(token: str) -> Optional[dict]:
-    """Authenticate WebSocket connection."""
+    """Authenticate WebSocket connection using centralized auth service."""
     try:
-        from jose import jwt
-        print(f"[WebSocket Auth] Attempting to verify token: {token[:50]}...")
+        import logging
+        from app.core.config import settings
+        from app.services.auth_service import AuthService
         
-        # Manually decode JWT for WebSocket (avoid HTTPException)
-        SECRET_KEY = "your-secret-key-here"
-        ALGORITHM = "HS256"
+        logger = logging.getLogger("security")
+        logger.info(f"[WebSocket Auth] Token verification attempt from connection")
         
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        # Use centralized auth service for consistent token validation
+        auth_service = AuthService()
         
-        # Check token type
+        # Verify token using centralized configuration
+        payload = auth_service.verify_access_token(token)
+        
+        if not payload:
+            logger.warning("[WebSocket Auth] Token verification failed")
+            return None
+            
+        # Check token type for additional security
         if payload.get("type") != "access":
-            print(f"[WebSocket Auth] Invalid token type: {payload.get('type')}")
+            logger.warning(f"[WebSocket Auth] Invalid token type: {payload.get('type')}")
             return None
             
         user_id = int(payload.get("sub"))
-        print(f"[WebSocket Auth] Token valid for user_id: {user_id}")
+        logger.info(f"[WebSocket Auth] Token valid for user_id: {user_id}")
         return {"id": user_id}
     except Exception as e:
-        print(f"[WebSocket Auth] Token verification failed: {e}")
+        logger = logging.getLogger("security")
+        logger.warning(f"[WebSocket Auth] Token verification failed: {type(e).__name__}")
         return None
 
 
