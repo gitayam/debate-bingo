@@ -45,11 +45,18 @@ def create_game_session(
     request: Request,
     session_data: BingoGameSessionCreate,
     db: Session = Depends(get_db),
-    current_user: dict = Depends(get_current_user)  # Require authentication
+    current_user: Optional[dict] = Depends(get_optional_user)  # Optional auth for solo play
 ):
-    """Create a new bingo game session."""
+    """Create a new bingo game session.
+    
+    Solo play: No authentication required, just provide a player_name
+    Multiplayer: Authentication required (will be enforced in room creation)
+    """
     service = BingoService(db)
     try:
+        # Add user_id if authenticated (for stats tracking)
+        if current_user:
+            session_data.user_id = current_user.get("id")
         return service.create_game_session(session_data)
     except ValueError as e:
         raise HTTPException(

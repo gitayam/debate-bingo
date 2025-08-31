@@ -39,17 +39,28 @@ export default function HomePage() {
           <GameSetup onGameStart={handleGameStart} />
         </div>
       ) : (
-        <div className="space-y-6 animate-fade-in">
-          {/* Game Status */}
-          <GameStatus />
-
-          {/* Bingo Grid */}
-          <div className="flex justify-center">
-            <BingoGrid gridSize={gridSize} />
+        <div className="animate-fade-in">
+          {/* Game Status Bar (without timeline) */}
+          <GameStatus hideTimeline={true} />
+          
+          {/* Main Game Area - Grid and Timeline Side by Side */}
+          <div className="mt-6 flex flex-col lg:flex-row gap-6">
+            {/* Bingo Grid - Main Content */}
+            <div className="flex-1 flex flex-col items-center space-y-6">
+              <BingoGrid gridSize={gridSize} />
+              <GameControls onNewGame={handleNewGame} />
+            </div>
+            
+            {/* Timeline - Sidebar on desktop, below on mobile */}
+            <div className="w-full lg:w-80 card p-4">
+              <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-gray-100">
+                Timeline
+              </h3>
+              <div className="max-h-[300px] lg:max-h-[600px] overflow-y-auto">
+                <GameStatus showTimelineOnly={true} />
+              </div>
+            </div>
           </div>
-
-          {/* Game Controls */}
-          <GameControls onNewGame={handleNewGame} />
         </div>
       )}
 
