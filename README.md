@@ -40,7 +40,7 @@ A modern, interactive debate bingo application built with **Next.js 15**, **Fast
 
 1. **Clone and setup:**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/gitayam/debate-bingo.git
    cd debate-bingo
    ./scripts/dev-setup.sh
    ```
